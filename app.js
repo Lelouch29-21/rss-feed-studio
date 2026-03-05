@@ -176,10 +176,10 @@ function render() {
     .join("");
 
   appRoot.innerHTML = `
-    <header class="panel header">
+    <header class="panel header animate-in">
       <div>
         <h1 class="header-title">SignalStream RSS Studio</h1>
-        <p class="header-subtitle">A professional RSS workspace where teams can add custom feeds and stay updated automatically.</p>
+        <p class="header-subtitle">Curate your own intelligence desk with customizable feeds and periodic live updates.</p>
       </div>
       <div class="status-strip">
         <span class="badge ${runtime.isRefreshingAll ? "warn" : "success"}">${runtime.isRefreshingAll ? "Refreshing feeds" : "Live updates ready"}</span>
@@ -189,7 +189,7 @@ function render() {
 
     ${runtime.toast ? `<div class="toast ${escapeHtml(runtime.toast.type)}">${escapeHtml(runtime.toast.message)}</div>` : ""}
 
-    <section class="stats-grid">
+    <section class="stats-grid animate-in">
       <article class="panel stat-card">
         <p class="stat-label">Tracked Feeds</p>
         <div class="stat-value">${stats.feedCount}</div>
@@ -208,9 +208,9 @@ function render() {
       </article>
     </section>
 
-    <div class="layout">
-      <aside class="sidebar">
-        <section class="panel panel-body">
+    <div class="workspace">
+      <section class="control-grid">
+        <section class="panel panel-body add-feed animate-in">
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Add RSS Feed</h2>
@@ -238,7 +238,7 @@ function render() {
           </form>
         </section>
 
-        <section class="panel panel-body">
+        <section class="panel panel-body settings-card animate-in">
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Update Settings</h2>
@@ -271,73 +271,71 @@ function render() {
             </div>
           </form>
         </section>
+      </section>
 
-        <section class="panel panel-body">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Your Feed List</h2>
-              <p class="panel-subtitle">Select, refresh, or remove any feed.</p>
-            </div>
+      <section class="panel panel-body feedbank animate-in">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Your Feed List</h2>
+            <p class="panel-subtitle">Select, refresh, or remove any feed.</p>
           </div>
+        </div>
 
-          <div class="feed-list">
-            ${
-              state.feeds.length
-                ? state.feeds.map((feed) => renderFeedCard(feed)).join("")
-                : '<div class="empty">No feeds yet. Add one to begin tracking updates.</div>'
-            }
-          </div>
-        </section>
-      </aside>
-
-      <main class="main">
-        <section class="panel toolbar">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Feed Explorer</h2>
-              <p class="panel-subtitle">Search stories and filter by source.</p>
-            </div>
-          </div>
-
-          <div class="toolbar-grid">
-            <input id="searchText" value="${escapeHtml(state.ui.search)}" placeholder="Search headlines, summaries, or source names" />
-            <select id="feedFilter">
-              <option value="all" ${state.ui.activeFeedId === "all" ? "selected" : ""}>All Feeds</option>
-              ${feedOptions}
-            </select>
-            <button class="btn ghost" type="button" data-action="clear-filters">Clear</button>
-          </div>
-        </section>
-
-        <section class="panel articles">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Latest Articles</h2>
-              <p class="panel-subtitle">Sorted by publish time (newest first).</p>
-            </div>
-          </div>
-
+        <div class="feed-list">
           ${
-            visibleArticles.length
-              ? `<div class="article-grid">${visibleArticles.map((article) => renderArticleCard(article)).join("")}</div>`
-              : '<div class="empty">No articles match your current view. Try refreshing feeds or clearing filters.</div>'
+            state.feeds.length
+              ? state.feeds.map((feed, index) => renderFeedCard(feed, index)).join("")
+              : '<div class="empty">No feeds yet. Add one to begin tracking updates.</div>'
           }
-        </section>
-      </main>
+        </div>
+      </section>
+
+      <section class="panel toolbar animate-in">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Feed Explorer</h2>
+            <p class="panel-subtitle">Search stories and filter by source.</p>
+          </div>
+        </div>
+
+        <div class="toolbar-grid">
+          <input id="searchText" value="${escapeHtml(state.ui.search)}" placeholder="Search headlines, summaries, or source names" />
+          <select id="feedFilter">
+            <option value="all" ${state.ui.activeFeedId === "all" ? "selected" : ""}>All Feeds</option>
+            ${feedOptions}
+          </select>
+          <button class="btn ghost" type="button" data-action="clear-filters">Clear</button>
+        </div>
+      </section>
+
+      <section class="panel articles animate-in">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Latest Articles</h2>
+            <p class="panel-subtitle">Sorted by publish time (newest first).</p>
+          </div>
+        </div>
+
+        ${
+          visibleArticles.length
+            ? `<div class="article-grid">${visibleArticles.map((article, index) => renderArticleCard(article, index)).join("")}</div>`
+            : '<div class="empty">No articles match your current view. Try refreshing feeds or clearing filters.</div>'
+        }
+      </section>
     </div>
   `;
 
   updateCountdownLabel();
 }
 
-function renderFeedCard(feed) {
+function renderFeedCard(feed, index = 0) {
   const isActive = state.ui.activeFeedId === feed.id;
   const loading = runtime.loadingFeedIds.has(feed.id);
   const lastFetchedText = feed.lastFetchedAt ? `Updated ${timeAgo(feed.lastFetchedAt)}` : "Never fetched";
   const safeAccent = normalizeColor(feed.accent);
 
   return `
-    <article class="feed-card ${isActive ? "active" : ""}" style="border-left-color: ${escapeHtml(safeAccent)};">
+    <article class="feed-card ${isActive ? "active" : ""}" style="--stagger:${index}; border-left-color: ${escapeHtml(safeAccent)};">
       <div>
         <h3 class="feed-title">${escapeHtml(feed.name)}</h3>
         <p class="feed-url">${escapeHtml(feed.url)}</p>
@@ -357,10 +355,10 @@ function renderFeedCard(feed) {
   `;
 }
 
-function renderArticleCard(article) {
+function renderArticleCard(article, index = 0) {
   const tint = withAlpha(article.feedAccent, 0.12);
   return `
-    <article class="article-card">
+    <article class="article-card" style="--stagger:${index % 14};">
       <div class="article-head">
         <h3 class="article-title"><a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(
     article.title
