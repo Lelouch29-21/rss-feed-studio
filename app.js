@@ -176,76 +176,56 @@ function render() {
     .join("");
 
   appRoot.innerHTML = `
-    <header class="panel header animate-in">
-      <div>
+    <div class="app-shell">
+      <header class="panel hero animate-in">
         <h1 class="header-title">SignalStream RSS Studio</h1>
-        <p class="header-subtitle">Curate your own intelligence desk with customizable feeds and periodic live updates.</p>
-      </div>
-      <div class="status-strip">
-        <span class="badge ${runtime.isRefreshingAll ? "warn" : "success"}">${runtime.isRefreshingAll ? "Refreshing feeds" : "Live updates ready"}</span>
-        <span class="badge" id="nextRefreshLabel">${escapeHtml(getNextRefreshText())}</span>
-      </div>
-    </header>
+        <p class="header-subtitle">A focused RSS desk for tracking the sources that matter, without visual noise.</p>
+        <div class="hero-actions">
+          <button class="btn secondary" type="button" data-action="refresh-all">${
+            runtime.isRefreshingAll ? "Refreshing..." : "Refresh Now"
+          }</button>
+          <span class="badge ${runtime.isRefreshingAll ? "warn" : "success"}">${
+            runtime.isRefreshingAll ? "Updating feeds" : "Auto-sync active"
+          }</span>
+          <span class="badge quiet" id="nextRefreshLabel">${escapeHtml(getNextRefreshText())}</span>
+        </div>
+      </header>
 
-    ${runtime.toast ? `<div class="toast ${escapeHtml(runtime.toast.type)}">${escapeHtml(runtime.toast.message)}</div>` : ""}
+      ${runtime.toast ? `<div class="toast ${escapeHtml(runtime.toast.type)}">${escapeHtml(runtime.toast.message)}</div>` : ""}
 
-    <section class="stats-grid animate-in">
-      <article class="panel stat-card">
-        <p class="stat-label">Tracked Feeds</p>
-        <div class="stat-value">${stats.feedCount}</div>
-      </article>
-      <article class="panel stat-card">
-        <p class="stat-label">Visible Articles</p>
-        <div class="stat-value">${stats.visibleArticleCount}</div>
-      </article>
-      <article class="panel stat-card">
-        <p class="stat-label">Healthy Feeds</p>
-        <div class="stat-value">${stats.healthyFeedCount}</div>
-      </article>
-      <article class="panel stat-card">
-        <p class="stat-label">Failed Feeds</p>
-        <div class="stat-value">${stats.failedFeedCount}</div>
-      </article>
-    </section>
-
-    <div class="workspace">
-      <section class="control-grid">
-        <section class="panel panel-body add-feed animate-in">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Add RSS Feed</h2>
-              <p class="panel-subtitle">Enter any RSS/Atom URL and track it.</p>
-            </div>
+      <section class="panel command animate-in">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Add Feed</h2>
+            <p class="panel-subtitle">Paste an RSS/Atom URL, set accent, and start streaming updates.</p>
           </div>
+        </div>
 
-          <form id="addFeedForm" class="form-grid">
-            <div class="field">
-              <label for="feedName">Feed Name (optional)</label>
-              <input id="feedName" name="name" maxlength="64" placeholder="e.g. Product Engineering Blog" />
-            </div>
-            <div class="field">
-              <label for="feedUrl">Feed URL</label>
-              <input id="feedUrl" name="url" type="url" required placeholder="https://example.com/feed.xml" />
-            </div>
-            <div class="field">
-              <label for="feedAccent">Accent Color</label>
-              <input id="feedAccent" name="accent" type="color" value="#0f8fda" />
-            </div>
-            <div class="btn-row">
-              <button class="btn primary" type="submit">Add Feed</button>
-              <button class="btn ghost" type="button" data-action="add-starters">Restore Starters</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="panel panel-body settings-card animate-in">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Update Settings</h2>
-              <p class="panel-subtitle">Control automatic refresh behavior.</p>
-            </div>
+        <form id="addFeedForm" class="command-form">
+          <div class="field">
+            <label for="feedName">Name</label>
+            <input id="feedName" name="name" maxlength="64" placeholder="e.g. Product Engineering Blog" />
           </div>
+          <div class="field wide">
+            <label for="feedUrl">Feed URL</label>
+            <input id="feedUrl" name="url" type="url" required placeholder="https://example.com/feed.xml" />
+          </div>
+          <div class="field accent-field">
+            <label for="feedAccent">Accent</label>
+            <input id="feedAccent" name="accent" type="color" value="#0f8fda" />
+          </div>
+          <button class="btn primary add-btn" type="submit">Add Feed</button>
+        </form>
 
+        <div class="stats-line">
+          <span class="metric">Feeds <strong>${stats.feedCount}</strong></span>
+          <span class="metric">Visible <strong>${stats.visibleArticleCount}</strong></span>
+          <span class="metric">Healthy <strong>${stats.healthyFeedCount}</strong></span>
+          <span class="metric">Failed <strong>${stats.failedFeedCount}</strong></span>
+        </div>
+
+        <details class="settings-wrap">
+          <summary>Advanced refresh settings</summary>
           <form id="settingsForm" class="form-grid two">
             <div class="field">
               <label for="refreshMinutes">Refresh Every</label>
@@ -259,25 +239,25 @@ function render() {
                 ${[10, 20, 30, 40, 60].map((value) => `<option value="${value}" ${state.settings.maxItemsPerFeed === value ? "selected" : ""}>${value}</option>`).join("")}
               </select>
             </div>
-            <div class="field" style="grid-column: 1 / -1;">
+            <div class="field checkline">
               <label>
                 <input name="autoRefresh" type="checkbox" ${state.settings.autoRefresh ? "checked" : ""} />
                 Auto-refresh feeds periodically
               </label>
             </div>
-            <div class="btn-row" style="grid-column: 1 / -1;">
-              <button class="btn secondary" type="submit">Save Settings</button>
-              <button class="btn warning" type="button" data-action="refresh-all">Refresh All Now</button>
+            <div class="btn-row">
+              <button class="btn primary" type="submit">Save Settings</button>
+              <button class="btn ghost" type="button" data-action="add-starters">Add Starter Feeds</button>
             </div>
           </form>
-        </section>
+        </details>
       </section>
 
-      <section class="panel panel-body feedbank animate-in">
+      <section class="panel feedbank animate-in">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">Your Feed List</h2>
-            <p class="panel-subtitle">Select, refresh, or remove any feed.</p>
+            <h2 class="panel-title">Feed Bank</h2>
+            <p class="panel-subtitle">Select, refresh, or remove sources.</p>
           </div>
         </div>
 
@@ -290,11 +270,11 @@ function render() {
         </div>
       </section>
 
-      <section class="panel toolbar animate-in">
+      <section class="panel explorer animate-in">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">Feed Explorer</h2>
-            <p class="panel-subtitle">Search stories and filter by source.</p>
+            <h2 class="panel-title">Article Stream</h2>
+            <p class="panel-subtitle">Search and filter your incoming feed stories.</p>
           </div>
         </div>
 
@@ -305,15 +285,6 @@ function render() {
             ${feedOptions}
           </select>
           <button class="btn ghost" type="button" data-action="clear-filters">Clear</button>
-        </div>
-      </section>
-
-      <section class="panel articles animate-in">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title">Latest Articles</h2>
-            <p class="panel-subtitle">Sorted by publish time (newest first).</p>
-          </div>
         </div>
 
         ${
