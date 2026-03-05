@@ -2,6 +2,10 @@
 
 SignalStream RSS Studio is a professional light-mode RSS dashboard where users can add custom feeds and get periodic updates automatically.
 
+## Live App
+
+- GitHub Pages: https://lelouch29-21.github.io/rss-feed-studio/
+
 ## Highlights
 
 - Professional colorful UI with responsive layout
