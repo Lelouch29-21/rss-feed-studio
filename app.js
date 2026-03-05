@@ -178,8 +178,14 @@ function render() {
   appRoot.innerHTML = `
     <div class="app-shell">
       <header class="panel hero animate-in">
-        <h1 class="header-title">SignalStream RSS Studio</h1>
-        <p class="header-subtitle">A focused RSS desk for tracking the sources that matter, without visual noise.</p>
+        <p class="hero-kicker">SignalStream</p>
+        <h1 class="header-title">Orbit RSS Desk</h1>
+        <p class="header-subtitle">A focused, lively reader where feeds stay organized and stories stay easy to scan.</p>
+        <div class="hero-pulse" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div class="hero-actions">
           <button class="btn secondary" type="button" data-action="refresh-all">${
             runtime.isRefreshingAll ? "Refreshing..." : "Refresh Now"
@@ -193,82 +199,84 @@ function render() {
 
       ${runtime.toast ? `<div class="toast ${escapeHtml(runtime.toast.type)}">${escapeHtml(runtime.toast.message)}</div>` : ""}
 
-      <section class="panel command animate-in">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title">Add Feed</h2>
-            <p class="panel-subtitle">Paste an RSS/Atom URL, set accent, and start streaming updates.</p>
+      <div class="top-grid">
+        <section class="panel command animate-in">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Add Feed</h2>
+              <p class="panel-subtitle">Paste an RSS or Atom source and start syncing updates.</p>
+            </div>
           </div>
-        </div>
 
-        <form id="addFeedForm" class="command-form">
-          <div class="field">
-            <label for="feedName">Name</label>
-            <input id="feedName" name="name" maxlength="64" placeholder="e.g. Product Engineering Blog" />
-          </div>
-          <div class="field wide">
-            <label for="feedUrl">Feed URL</label>
-            <input id="feedUrl" name="url" type="url" required placeholder="https://example.com/feed.xml" />
-          </div>
-          <div class="field accent-field">
-            <label for="feedAccent">Accent</label>
-            <input id="feedAccent" name="accent" type="color" value="#0f8fda" />
-          </div>
-          <button class="btn primary add-btn" type="submit">Add Feed</button>
-        </form>
-
-        <div class="stats-line">
-          <span class="metric">Feeds <strong>${stats.feedCount}</strong></span>
-          <span class="metric">Visible <strong>${stats.visibleArticleCount}</strong></span>
-          <span class="metric">Healthy <strong>${stats.healthyFeedCount}</strong></span>
-          <span class="metric">Failed <strong>${stats.failedFeedCount}</strong></span>
-        </div>
-
-        <details class="settings-wrap">
-          <summary>Advanced refresh settings</summary>
-          <form id="settingsForm" class="form-grid two">
+          <form id="addFeedForm" class="command-form">
             <div class="field">
-              <label for="refreshMinutes">Refresh Every</label>
-              <select id="refreshMinutes" name="refreshMinutes">
-                ${[1, 5, 10, 15, 30, 60, 120].map((value) => `<option value="${value}" ${state.settings.refreshMinutes === value ? "selected" : ""}>${value} min</option>`).join("")}
-              </select>
+              <label for="feedName">Name</label>
+              <input id="feedName" name="name" maxlength="64" placeholder="e.g. Product Engineering Blog" />
             </div>
             <div class="field">
-              <label for="maxItems">Items Per Feed</label>
-              <select id="maxItems" name="maxItemsPerFeed">
-                ${[10, 20, 30, 40, 60].map((value) => `<option value="${value}" ${state.settings.maxItemsPerFeed === value ? "selected" : ""}>${value}</option>`).join("")}
-              </select>
+              <label for="feedUrl">Feed URL</label>
+              <input id="feedUrl" name="url" type="url" required placeholder="https://example.com/feed.xml" />
             </div>
-            <div class="field checkline">
-              <label>
-                <input name="autoRefresh" type="checkbox" ${state.settings.autoRefresh ? "checked" : ""} />
-                Auto-refresh feeds periodically
-              </label>
+            <div class="field accent-field">
+              <label for="feedAccent">Accent</label>
+              <input id="feedAccent" name="accent" type="color" value="#0f8fda" />
             </div>
-            <div class="btn-row">
-              <button class="btn primary" type="submit">Save Settings</button>
-              <button class="btn ghost" type="button" data-action="add-starters">Add Starter Feeds</button>
-            </div>
+            <button class="btn primary add-btn" type="submit">Add Feed</button>
           </form>
-        </details>
-      </section>
 
-      <section class="panel feedbank animate-in">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title">Feed Bank</h2>
-            <p class="panel-subtitle">Select, refresh, or remove sources.</p>
+          <div class="stats-line">
+            <span class="metric">Feeds <strong>${stats.feedCount}</strong></span>
+            <span class="metric">Visible <strong>${stats.visibleArticleCount}</strong></span>
+            <span class="metric">Healthy <strong>${stats.healthyFeedCount}</strong></span>
+            <span class="metric">Failed <strong>${stats.failedFeedCount}</strong></span>
           </div>
-        </div>
 
-        <div class="feed-list">
-          ${
-            state.feeds.length
-              ? state.feeds.map((feed, index) => renderFeedCard(feed, index)).join("")
-              : '<div class="empty">No feeds yet. Add one to begin tracking updates.</div>'
-          }
-        </div>
-      </section>
+          <details class="settings-wrap">
+            <summary>Advanced refresh settings</summary>
+            <form id="settingsForm" class="form-grid two">
+              <div class="field">
+                <label for="refreshMinutes">Refresh Every</label>
+                <select id="refreshMinutes" name="refreshMinutes">
+                  ${[1, 5, 10, 15, 30, 60, 120].map((value) => `<option value="${value}" ${state.settings.refreshMinutes === value ? "selected" : ""}>${value} min</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label for="maxItems">Items Per Feed</label>
+                <select id="maxItems" name="maxItemsPerFeed">
+                  ${[10, 20, 30, 40, 60].map((value) => `<option value="${value}" ${state.settings.maxItemsPerFeed === value ? "selected" : ""}>${value}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field checkline">
+                <label>
+                  <input name="autoRefresh" type="checkbox" ${state.settings.autoRefresh ? "checked" : ""} />
+                  Auto-refresh feeds periodically
+                </label>
+              </div>
+              <div class="btn-row">
+                <button class="btn primary" type="submit">Save Settings</button>
+                <button class="btn ghost" type="button" data-action="add-starters">Add Starter Feeds</button>
+              </div>
+            </form>
+          </details>
+        </section>
+
+        <section class="panel feedbank animate-in">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Feed Bank</h2>
+              <p class="panel-subtitle">Pick a source, refresh it instantly, or clear it out.</p>
+            </div>
+          </div>
+
+          <div class="feed-list">
+            ${
+              state.feeds.length
+                ? state.feeds.map((feed, index) => renderFeedCard(feed, index)).join("")
+                : '<div class="empty">No feeds yet. Add one to begin tracking updates.</div>'
+            }
+          </div>
+        </section>
+      </div>
 
       <section class="panel explorer animate-in">
         <div class="panel-head">
@@ -289,7 +297,7 @@ function render() {
 
         ${
           visibleArticles.length
-            ? `<div class="article-grid">${visibleArticles.map((article, index) => renderArticleCard(article, index)).join("")}</div>`
+            ? `<div class="article-stream">${visibleArticles.map((article, index) => renderArticleCard(article, index)).join("")}</div>`
             : '<div class="empty">No articles match your current view. Try refreshing feeds or clearing filters.</div>'
         }
       </section>
@@ -306,8 +314,8 @@ function renderFeedCard(feed, index = 0) {
   const safeAccent = normalizeColor(feed.accent);
 
   return `
-    <article class="feed-card ${isActive ? "active" : ""}" style="--stagger:${index}; border-left-color: ${escapeHtml(safeAccent)};">
-      <div>
+    <article class="feed-card ${isActive ? "active" : ""}" style="--stagger:${index}; --feed-accent:${escapeHtml(safeAccent)};">
+      <div class="feed-head">
         <h3 class="feed-title">${escapeHtml(feed.name)}</h3>
         <p class="feed-url">${escapeHtml(feed.url)}</p>
       </div>
@@ -329,7 +337,7 @@ function renderFeedCard(feed, index = 0) {
 function renderArticleCard(article, index = 0) {
   const tint = withAlpha(article.feedAccent, 0.12);
   return `
-    <article class="article-card" style="--stagger:${index % 14};">
+    <article class="article-card" style="--stagger:${index % 14}; --feed-accent:${escapeHtml(article.feedAccent)};">
       <div class="article-head">
         <h3 class="article-title"><a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(
     article.title
@@ -339,7 +347,9 @@ function renderArticleCard(article, index = 0) {
   )}</span>
       </div>
       <p class="article-summary">${escapeHtml(article.summary || "No summary provided by source.")}</p>
-      <p class="article-meta">Published ${escapeHtml(formatDate(article.publishedAt))}</p>
+      <div class="article-foot">
+        <p class="article-meta">Published ${escapeHtml(formatDate(article.publishedAt))}</p>
+      </div>
     </article>
   `;
 }
